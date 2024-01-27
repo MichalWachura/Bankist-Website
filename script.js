@@ -1,300 +1,712 @@
 'use strict';
 
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+// BANKIST APP
 
-
-const modal = document.querySelector('.modal');
-const overlay = document.querySelector('.overlay');
-const btnCloseModal = document.querySelector('.btn--close-modal');
-const btnsOpenModal = document.querySelectorAll('.btn--show-modal');
-
-const btnScrollTo = document.querySelector('.btn--scroll-to');
-const section1 = document.querySelector('#section--1');
-const header = document.querySelector('.header')
-const allSections = document.querySelectorAll('.section')
-const allButtons = document.getElementsByTagName('button')
-
-// Tabbded Componnent
-const tabs = document.querySelectorAll('.operations__tab');
-const tabsContainer = document.querySelector('.operations__tab-container');
-const tabsContent = document.querySelectorAll('.operations__content');
-
-const nav = document.querySelector('.nav')
-
-///////////////////////////////////////
-// Modal window
-const openModal = function (e) {
-  e.preventDefault();
-  modal.classList.remove('hidden');
-  overlay.classList.remove('hidden');
+// Data
+const account1 = {
+  owner: 'Jonas Schmedtmann',
+  movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
+  interestRate: 1.2, // %
+  pin: 1111,
 };
 
-const closeModal = function () {
-  modal.classList.add('hidden');
-  overlay.classList.add('hidden');
+const account2 = {
+  owner: 'Jessica Davis',
+  movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
+  interestRate: 1.5,
+  pin: 2222,
 };
 
-btnsOpenModal.forEach(btn=>btn.addEventListener('click', openModal))
-btnCloseModal.addEventListener('click', closeModal);
-overlay.addEventListener('click', closeModal);
-
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-    closeModal();
-  }
-});
-
-//////////////////////////////////////////////
-// Page navigation ( SMOOTH NAVIGATION)
-
-//document.querySelectorAll('.nav__link').forEach(function//(el){
-//  el.addEventListener('click',function(e){
-//    e.preventDefault();
-//    const id = this.getAttribute('href');
-//    console.log(id)
-//    document.querySelector(id).scrollIntoView//({behavior:'smooth'})
-//  })
-//});
-
-// 1. Add event listner to common parent element
-// 2. Determinate what element originated the event
-
-document.querySelector('.nav__links').addEventListener('click',function(e){
-  e.preventDefault();
- // Matching Strategy
-  if(e.target.classList.contains('nav__link')){
-    
-    const id = e.target.getAttribute('href');
-    document.querySelector(id).scrollIntoView({behavior:'smooth'})
-  }
-})
-  
-
-
-// button scorlling
-btnScrollTo.addEventListener('click',function(e){
-
-  // OLD WAY
-  //const s1cords = section1.getBoundingClientRect();
-  //console.log(s1cords)
-  //console.log(e.target.getBoundingClientRect())
-  //console.log('Current scroll(X/Y',window.pageXOffset,window.pageYOffset)
-
-  // scrolling
-  //window.scrollTo(s1cords.left +window.pageXOffset,
-  //s1cords.top+pageYOffset
-  //);
-  
-  //window.scrollTo({
-  //  left:s1cords.left + window.pageXOffset,
-  //  top:s1cords.top+ window.pageYOffset,
-  //  behavior:'smooth'
-  //});
-  section1.scrollIntoView({behavior:'smooth'})
-})
-/*
-// ==================== 189 Events and event Heandlesrs ====================
-
-const h1 = document.querySelector('h1');
-
-
-const alertH1 = function(e){
-  alert('addEventListener : Great! You are reading a heading :)');
-  
+const account3 = {
+  owner: 'Steven Thomas Williams',
+  movements: [200, -200, 340, -300, -20, 50, 400, -460],
+  interestRate: 0.7,
+  pin: 3333,
 };
 
-h1.addEventListener('mouseenter',alertH1)
+const account4 = {
+  owner: 'Sarah Smith',
+  movements: [430, 1000, 700, 50, 90],
+  interestRate: 1,
+  pin: 4444,
+};
+
+const accounts = [account1, account2, account3, account4];
+
+// Elements
+const labelWelcome = document.querySelector('.welcome');
+const labelDate = document.querySelector('.date');
+const labelBalance = document.querySelector('.balance__value');
+const labelSumIn = document.querySelector('.summary__value--in');
+const labelSumOut = document.querySelector('.summary__value--out');
+const labelSumInterest = document.querySelector('.summary__value--interest');
+const labelTimer = document.querySelector('.timer');
+
+const containerApp = document.querySelector('.app');
+const containerMovements = document.querySelector('.movements');
+
+const btnLogin = document.querySelector('.login__btn');
+const btnTransfer = document.querySelector('.form__btn--transfer');
+const btnLoan = document.querySelector('.form__btn--loan');
+const btnClose = document.querySelector('.form__btn--close');
+const btnSort = document.querySelector('.btn--sort');
+
+let inputLoginUsername = document.querySelector('.login__input--user');
+let inputLoginPin = document.querySelector('.login__input--pin');
+const inputTransferTo = document.querySelector('.form__input--to');
+const inputTransferAmount = document.querySelector('.form__input--amount');
+const inputLoanAmount = document.querySelector('.form__input--loan-amount');
+const inputCloseUsername = document.querySelector('.form__input--user');
+const inputClosePin = document.querySelector('.form__input--pin');
+
+const displayMovements = function(movements,sort=false){
+
+  containerMovements.innerHTML='';
+
+  const movs = sort ? movements.slice().sort((a,b) => a-b) : movements
+
+  movs.forEach(function(mov,i){
+
+    const type = mov > 0 ? 'deposit':'withdrawal'
+    const html=`
+    <div class="movements__row">
+          <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
+          
+          <div class="movements__value">${mov}</div>
+        </div>
+        `;
+        containerMovements.insertAdjacentHTML('afterbegin',html)
+
+  });
 
-setTimeout(()=>h1.removeEventListener('mouseenter',alertH1),3000)
-
-//h1.onmouseenter = function(e){
-  //alert('addEventListener : Great! You are reading a heading :)')
-//};
-
-
-
-
-// rgb  255,255,255
-const randomInt = (min,max) =>Math.floor(Math.random()*(max-min+1)+min)
-
-const randomColor = ()=> `rgb(${randomInt(0,255)},${randomInt(0,255)},${randomInt(0,255)})`
-
-document.querySelector('.nav__link').addEventListener('click',function(e){
-  this.style.backgroundColor = randomColor()
-  console.log('LINK',e.target,e.currentTarget)
-  console.log(e.currentTarget === this)
-
-  // Stop propagation
-  //e.stopPropagation()
-})
-
-document.querySelector('.nav__links').addEventListener('click',function(e){
-  this.style.backgroundColor = randomColor()
-  console.log('CONTAINER',e.target,e.currentTarget)
-  
-  
-})
-document.querySelector('.nav').addEventListener('click',function(e){
-  this.style.backgroundColor = randomColor()
-  console.log('NAV',e.target,e.currentTarget)
- 
-})
-
-
-
-/ creating and inserting elemnts
-const message = document.createElement('div');
-message.classList.add('cookie-message');
-message.innerHTML='We use cookies for improved functionality.<button class="btn btn--close-cookies">Got it !</button>';
-header.append(message)
-//header.append(message.cloneNode(true))
-//header.before(message);
-//header.after(message);
-
-// Delete elemtns
-document.querySelector('.btn--close-cookies').addEventListener('click',function(){
-  //message.remove();
-  message.parentElement.removeChild(message)
-});
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-// Styles
-
-message.style.backgroundColor='#37383d'
-message.style.width='120%'
-
-console.log(getComputedStyle(message).color)
-console.log(getComputedStyle(message).height)
-
-message.style.height = Number.parseFloat(getComputedStyle(message).height,10) + 30 + 'px';
-
-document.documentElement.style.setProperty('--color-primary','orangered')
-
-// Atributtes
-const logo = document.querySelector('.nav__logo')
-console.log(logo.alt)
-
-console.log(logo.getAttribute('designer'));
-logo.setAttribute('company','Bankist');
-
-console.log(logo.src)
-console.log(logo.getAttribute('src'))
-
-const link = document.querySelector('.nav__link--btn')
-console.log(link.href);
-console.log(link.getAttribute('href'))
-
-// Data attributtes
-
-console.log(logo.dataset.vesrionNumber)
-
-// Classes 
-
-logo.classList.add('c','j')
-logo.classList.remove('c','j')
-logo.classList.toggle('c','j')
-logo.classList.contains('c','j')
-
-// Dont use it!! (overwrite!)
-logo.className='jonas'
-
-
-const h1 = document.querySelector('h1')
-
-// going downwards : child
-
-console.log(h1.querySelectorAll('.highlight'))
-console.log(h1.children);
-h1.firstElementChild.style.color = 'white';
-h1.lastElementChild.style.color = 'black';
-
-// going upwards : parent
-
-console.log(h1.parentNode)
-console.log(h1.parentElement)
-
-h1.closest('.header').style.background = ' var(--gradient-secondary)'
-
-h1.closest('h1').style.background = ' var(--gradient-primary)'
-
-// going sideways : siblings
-
-console.log(h1.previousElementSibling)
-console.log(h1.nextElementSibling)
-
-console.log(h1.previousSibling)
-console.log(h1.nextSibling)
-
-console.log(h1.parentElement.children);
-
-[...h1.parentElement.children].forEach(function(el){
-  if(el !== h1){
-    el.style.transform = 'scale(0.5)'
-  }
-})
-*/
-
-
-// ====================  Tabbed Component ====================
-
-tabsContainer.addEventListener('click',function(e){
-  const clicked = e.target.closest('.operations__tab')
-
-  //Guard clause
-  if(!clicked) return
-
-  // Remove active classes
-  tabs.forEach(tab=> tab.classList.remove('operations__tab--active'))
-  tabsContent.forEach(content=> content.classList.remove('operations__content--active'))
-
-  // Active tab
-  clicked.classList.add('operations__tab--active')
-
-  // Active content area
-  document.querySelector(`.operations__content--${clicked.dataset.tab}`).classList.add('operations__content--active')
-})
-
-// ====================  MENU FADE ANIMATAION (196 PASSING ARGUMENTS TO EVENT HANDLERS) ====================
-
-const handleHover = function(e,opacity){
-  if(e.target.classList.contains('nav__link')){
-    const link = e.target;
-    const siblings = link.closest('.nav').querySelectorAll('.nav__link')
-    const logo = link.closest('.nav').querySelector('img')
-
-    siblings.forEach(element => {
-      if(element !==link)
-       element.style.opacity = this;
-    })
-
-    logo.style.opacity = this
-  }
 }
 
-/*
-nav.addEventListener('mouseover',function(e){
-  handleHover(e,0.5)
+const calcDisplayBalance = function (acc){
+  acc.balance  = acc.movements.reduce((acc,mov) => acc+mov,0)
+  
+  labelBalance.textContent = `${acc.balance}EUR`
+}
+
+const calcdisplaySummary = function(acc){ // acc---> account
+
+  const incomes = acc.movements.filter(mov=> mov>0).reduce((acc,mov)=>acc+mov,0)
+  labelSumIn.textContent = `${incomes} EU`
+
+  const out = acc.movements.filter(mov=> mov < 0).reduce((acc,mov)=>acc+mov,0)
+  labelSumOut.textContent= ` ${Math.abs(out)} EU`;
+
+  const intrest = acc.movements
+  .filter(mov => mov > 0)
+  .map(deposit => deposit*acc.interestRate/100)
+  .filter(intrest=>intrest >=1)
+  .reduce((acc,intrest)=>acc+intrest,0)
+  labelSumInterest.textContent = `${intrest}EUR`
+}
+
+
+//displaySummary(account1.movements)
+
+const createUserNames = function(accs){
+
+  accs.forEach(function(acc){
+    acc.username = acc.owner
+    .toLowerCase()
+    .split(' ')// ['steven','thomas','wiliams]
+    .map(function(name){
+      return name[0]
+    }).join('')
+    
+  });
+  
+
+}
+
+createUserNames(accounts)
+
+const updateUI = function(acc){
+  // display movements 
+
+  displayMovements(acc.movements)
+
+  // display balance
+
+  calcDisplayBalance(acc)
+
+  // Display summary
+
+  calcdisplaySummary(acc);
+  
+
+};
+
+// ================== Implementing Login ==================
+// Event Handler
+
+let currentAccount;
+
+btnLogin.addEventListener('click',function(e){
+  // Prevetn form form submitting
+  e.preventDefault()
+  currentAccount = accounts.find(acc=>acc.username === inputLoginUsername.value )
+  
+  if( currentAccount?.pin === Number(inputLoginPin.value))
+
+  // display UI and message
+  labelWelcome.textContent = `Welcome Back, ${currentAccount.owner.split(' ')[0]}`;
+
+  containerApp.style.opacity = 100;
+  // Clear the input fields
+  inputLoginPin.value = inputLoginUsername.value ='';
+  inputLoginPin.blur();
+  
+  // Upadte UI
+  updateUI(currentAccount)
+
+ 
+ }
+
+)
+
+
+btnTransfer.addEventListener('click',function(e){
+  e.preventDefault();
+  const amount = Number(inputTransferAmount.value);
+  const reciverAcc = accounts.find(acc => acc.username === inputTransferTo.value);
+  console.log(amount,reciverAcc)
+  inputTransferAmount.value = inputTransferTo.value = ''
+
+  if(amount > 0 && 
+    reciverAcc &&
+    currentAccount.balance >= amount && 
+    reciverAcc.username !==currentAccount.username)
+    {
+      // Doing a transfer
+      currentAccount.movements.push(-amount);
+      reciverAcc.movements.push(amount);
+        // Upadte UI
+      updateUI(currentAccount)
+  }
+
+
 })
 
-nav.addEventListener('mouseout',function(e){
-  handleHover(e,1)
+btnLoan.addEventListener('click',function(e){
+
+  e.preventDefault();
+  const amount = Number(inputLoanAmount.value);
+  if(amount > 0 && currentAccount.movements.some(mov =>mov >=amount*0.1 )){
+    // Add movement 
+    currentAccount.movements.push(amount);
+    //Upadete UI
+  updateUI(currentAccount)
+  }
+  inputLoanAmount.value='';
+  
+  
 })
+
+
+
+btnClose.addEventListener('click',function(e){
+
+  e.preventDefault();
+
+
+ // console.log('delete')
+
+ 
+  if(inputCloseUsername.value===currentAccount.username && Number(inputClosePin.value)===currentAccount.pin){
+    const index = accounts.findIndex(acc => acc.username ===currentAccount.username)
+  
+    console.log(index)
+
+    // delite account
+    accounts.splice(index,1);
+
+    // hide UI
+    containerApp.style.opacity = 0;
+  }
+  inputClosePin.value = inputCloseUsername.value = '';
+})
+
+
+let sorted = false;
+
+btnSort.addEventListener("click",function(e){
+  e.preventDefault();
+  displayMovements(currentAccount.movements,!sorted)
+  sorted = !sorted
+})
+// ======================== 150 The Map Method  ========================
+/*
+// Map method is looping over an array and returning new array modifed in cetrain callback function!
+const movements= [200, 450, -400, 3000, -650, -130, 70, 1300]
+
+const euroToUsd = 1.1 ;
+
+const movemnetsUsd = movements.map(mov => mov*euroToUsd)
+
+//console.log(movements);
+//console.log(movemnetsUsd);
+
+const movemnetsUsdFor = [];
+for (const mov of movements){
+
+  movemnetsUsdFor.push(mov *1.1)
+
+}
+
+const movementsDescriptions = movements.map((mov,i)=>
+
+  `Movement ${i+1}: You ${mov > 0 ? 'deposited' : 'withdraw'}  ${Math.abs(mov)}`
+);
+ 
+//console.log(movementsDescriptions)
+// ======================== 152 The Filter Method ========================
+console.log("-------------------------------------")
+const deposits = movements.filter(function(mov){
+  return mov > 0 ;
+
+})
+
+deposits.forEach(print)
+
+function print(element){
+  console.log(element)
+}
+
+
+const depositsFor = []
+for (const mov of movements){
+  if(mov > 0 ){
+    depositsFor.push(mov)
+  }
+}
+console.log(depositsFor)
+
+function checkWithdraws (mov){
+  return mov < 0
+
+}
+
+const withdrawals = movements.filter(checkWithdraws)
+console.log(withdrawals)
+withdrawals.forEach(print)
+
+
+// 
+// ======================== 153 The Reduce Method ========================
+
+console.log(movements);
+
+// accumalotr is like a SNOWBALL
+
+const balance = movements.reduce(function(accumulator,current,index,array){
+  console.log(`iteration ${index} : ${accumulator}`)
+  return accumulator + current
+})
+
+print(balance)
+
+
+// Maximal value
+
+const max = movements.reduce(function(acc,mov){
+  if (acc > mov){
+    return acc;
+  }else{ acc < mov}{
+    return mov
+  }
+},movements[0]);
+
+console.log(max)
+
+
+
+
+
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+// LECTURES
+/*
+const currencies = new Map([
+  ['USD', 'United States dollar'],
+  ['EUR', 'Euro'],
+  ['GBP', 'Pound sterling'],
+]);
+
+//const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+/////////////////////////////////////////////////
+
+
+
+let arr = ['a','b','c','d','e'];
+//  SLICE
+console.log(arr.slice(2));
+console.log(arr.slice(2,4));
+console.log(arr.slice(-1));
+console.log(arr.slice(1,-2));
+console.log(arr.slice());
+console.log([...arr]);
+
+// SPLICE - muted orginall array
+// using mainly to delete items
+
+
+
+arr.splice(1,2)
+console.log(arr)
+
+// REVERSE
+// muted orginal
+
+arr = ['a','b','c','d','e'];
+
+const arr2 = ['j','i','h','g','f']
+console.log(arr2.reverse())
+console.log(arr2)
+
+// CONCAT
+
+const letters = arr.concat(arr2);
+console.log(letters)
+console.log([...arr,...arr2])
+
+// JOIN
+console.log(letters.join(' - '))
+
 */
 
-// Passing 'argument' into handleHover
-nav.addEventListener('mouseover',handleHover.bind(0.5))
+//const arr = [21,11,64];
+//console.log(arr[0]);
+//console.log(arr.at(0))
 
-nav.addEventListener('mouseout',handleHover.bind(1))
+
+// getting last array element
+//console.log(arr[arr.length-1]);
+//console.log(arr.slice(-1)[0]);
+//console.log(arr.at(-2))
+
+//console.log("michal".at(-1))
+
+/*
+function cammelString (string){
+  let finalString=''
+  let modifyString = string.toLowerCase()
+  for(let i=0 ; i< modifyString.length; ++i ){
+    if(i%2===0){
+     finalString += modifyString[i].toUpperCase()
+    }else{
+     finalString += modifyString[i]
+    }
+  }
+  return finalString
+}
+
+console.log(cammelString("michal"))
+
+
+
+
+console.log(cammelString("MICHAL"))
+console.log(cammelString('1998'))
+console.log(cammelString('MIchAl'))
+console.log(cammelString('micHAL waCHURA'))
+
+
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+for (const movement of movements){
+  if (movement > 0){
+    console.log(`You depisited ${movement}`);
+  }else{
+    console.log(`You withdraw ${Math.abs(movement)}`);
+  }
+  }
+console.log('---------------------------------------------')
+
+movements.forEach(function(movement)
+{
+  if (movement > 0){
+    console.log(`You depisited ${movement}`);
+  }else{
+    console.log(`You withdraw ${Math.abs(movement)}`);
+  }
+})
+*/
+// Coding Challenge #1
+
+/* 
+Julia and Kate are doing a study on dogs. So each of them asked 5 dog owners about their dog's age, and stored the data into an array (one array for each). For now, they are just interested in knowing whether a dog is an adult or a puppy. A dog is an adult if it is at least 3 years old, and it's a puppy if it's less than 3 years old.
+
+Create a function 'checkDogs', which accepts 2 arrays of dog's ages ('dogsJulia' and 'dogsKate'), and does the following things:
+
+1. Julia found out that the owners of the FIRST and the LAST TWO dogs actually have cats, not dogs! So create a shallow copy of Julia's array, and remove the cat ages from that copied array (because it's a bad practice to mutate function parameters)
+2. Create an array with both Julia's (corrected) and Kate's data
+3. For each remaining dog, log to the console whether it's an adult ("Dog number 1 is an adult, and is 5 years old") or a puppy ("Dog number 2 is still a puppy 🐶")
+4. Run the function for both test datasets
+
+HINT: Use tools from all lectures in this section so far 😉
+
+TEST DATA 1: Julia's data [3, 5, 2, 12, 7], Kate's data [4, 1, 15, 8, 3]
+TEST DATA 2: Julia's data [9, 16, 6, 8, 3], Kate's data [10, 5, 6, 1, 4]
+
+GOOD LUCK 😀
+
+
+const juliaOne = [3, 5, 2, 12, 7];
+const juliaTwo = [9, 16, 6, 8, 3];
+
+const kateOne = [9, 16, 6, 8, 3] ;
+const kateTwo = [10, 5, 6, 1, 4] ;
+
+function checkDogs(dogsJulia,dogsKate){
+  console.log('Janeja');
+  let dogsJuliaCorrect = dogsJulia.slice(1,3)
   
+  let allDogs = [...dogsJuliaCorrect,...dogsKate];
+  console.log(dogsJuliaCorrect)
+  console.log(allDogs)
+
+  function displayDogs(allDogs){
+   for(let i =0 ; i<allDogs.length ; i++){
+     allDogs[i] >=3 ? console.log(`Dog number ${i+1} is an adult, and is ${allDogs[i]} years old`) : console.log(`Dog number ${i+1}  is still a puppy 🐶`)
+     
+   }
+   
+  }
+      
+    
+  
+
+  displayDogs(allDogs)
+
+}
+
+checkDogs(juliaOne,kateOne)
+
+// Jonas Solution
+
+const checkDogs = function(dogsJulia,dogsKate){
+  const dogsJuliaCorrected = dogsJulia.slice();
+  dogsJuliaCorrected.splice(0,1);
+  dogsJuliaCorrected.splice(-2);
+
+ const dogs = dogsJuliaCorrected.concat(dogsKate);
+
+ dogs.forEach(function(dog,i){
+
+  if(dog >=3){
+    console.log(`Dog number ${i+1} is an adult, and is ${allDogs[i]} years old`)
+  }else{
+    console.log(`Dog number ${i+1}  is still a puppy 🐶`)
+  }
+
+ })
+
+}
+
+checkDogs([3, 5, 2, 12, 7],[9, 16, 6, 8, 3])
+*/
+
+// ======================== 150 The Map Method  ========================
+
+// Map method is looping over an array and returning new array modifed in cetrain callback function!
+///////////////////////////////////////
+// Coding Challenge #2
+
+/* 
+Let's go back to Julia and Kate's study about dogs. This time, they want to convert dog ages to human ages and calculate the average age of the dogs in their study.
+
+Create a function 'calcAverageHumanAge', which accepts an arrays of dog's ages ('ages'), and does the following things in order:
+
+1. Calculate the dog age in human years using the following formula: if the dog is <= 2 years old, humanAge = 2 * dogAge. If the dog is > 2 years old, humanAge = 16 + dogAge * 4.
+2. Exclude all dogs that are less than 18 human years old (which is the same as keeping dogs that are at least 18 years old)
+3. Calculate the average human age of all adult dogs (you should already know from other challenges how we calculate averages 😉)
+4. Run the function for both test datasets
+
+TEST DATA 1: [5, 2, 4, 1, 15, 8, 3]
+TEST DATA 2: [16, 6, 10, 5, 6, 1, 4]
+
+GOOD LUCK 😀
+
+
+const agesOne = [5, 2, 4, 1, 15, 8, 3];
+const agesTwo = [16, 6, 10, 5, 6, 1, 4];
+
+function calcAverageHumanAge (ages){
+// filter dogs younger than 2 years
+const dogUnderEqualTwo = ages.filter(element => element <= 2)
+// filter dogs more equals thna 2 years
+const dogOverTwo = ages.filter(element => element > 2)
+
+// Calculating human ages years
+const humanAgeUnderEqualTwo = dogUnderEqualTwo.map(element => element*2)
+const humanAgeAboveTwo = dogOverTwo.map(element => element*4 +16)
+
+// Joinig ages togheter 
+
+const allDogsHumanAge = [...humanAgeUnderEqualTwo,...humanAgeAboveTwo]
+
+// Filtering 'adults' dogs
+const adultDogs = allDogsHumanAge.filter(element => element >18)
+
+// Calculating avarge
+
+// 1)sum of elements(ages)
+const sumOfDogsAgeinHumanYears = adultDogs.reduce((sum,element) => sum+element)
+//2) Avarage
+const avarge = sumOfDogsAgeinHumanYears / adultDogs.length
+
+return avarge
+}
+
+console.log(calcAverageHumanAge(agesOne))
+console.log(calcAverageHumanAge(agesTwo))
+
+
+
+// PIPLINE
+
+const totalDepositsInUSDollar = movements.filter(mov => mov > 0 ).map(mov => mov *euroToUsd).reduce((acc,mov)=> acc+mov,0);
+console.log(totalDepositsInUSDollar)
+
+const totalDepositsInUSDollarTwo = movements
+.filter(mov => mov < 0 )
+.map((mov,i,arr) =>{
+  console.log(arr)
+  return mov*euroToUsd;
+})
+//.map(mov => mov *euroToUsd)
+.reduce((acc,mov)=> acc+mov,0);
+console.log(totalDepositsInUSDollar)
+
+// ================== 157 Findmethod ==================
+
+const firtsWithdrawal = movements.find(mov=> mov < 0) 
+console.log(firtsWithdrawal)
+
+console.log(accounts)
+
+const account = accounts.find(acc=>acc.owner='Jessica Davis')
+console.log(account)
+
+*/
+
+
+// ================== 161 Some and every ==================
+
+const movements =  [200, 450, -400, 3000, -650, -130, 70, 1300];
+console.log(movements)
+
+// EQALITY
+
+console.log(movements.includes(-130))
+
+// SOME CONDITION
+
+const anyDeposits = movements.some(mov => mov > 0)
+console.log(anyDeposits)
+
+// EVERY
+console.log(movements.every(mov => mov > 0))
+
+// separate callback
+
+const deposit = mov => mov > 0;
+
+console.log(movements.some(deposit))
+console.log(movements.every(deposit))
+console.log(movements.filter(deposit))
+
+
+// ================== 161 flat FlatMap ==================
+const arr = [[1,2,3],[4,5,6],[7,8,9],10,11]
+const arrDeep=[[[1,2,3,[,4,5,6]],[2,3,4]],[4,5,6],[7,8,9],10,11]
+console.log(arr.flat())
+
+
+const accountsMovemnets = accounts.map(acc =>acc.movements)
+console.log(accountsMovemnets)
+
+const allMovements = accountsMovemnets.flat();
+console.log(allMovements)
+
+const overalBalance = allMovements.reduce((acc,mov) =>acc +mov,0)
+console.log(overalBalance)
+
+// ================== SORTING ==================
+// Strings
+const owners = ['Jonas','Zach','Adam','Martha']
+console.log(owners.sort())
+// Numbers 
+console.log(movements)
+// return < 0 ----> A,B (keep order)
+//return > 0 ---->  B,A (switch order)
+
+// Ascemding
+//movements.sort((a , b)=> {
+// if(a>b)
+ //return 1;
+//if(b>a)
+//return -1;
+//});
+//console.log(movements)
+
+movements.sort((a,b)=>a-b)
+console.log(movements)
+
+// Desscending
+movements.sort((a,b)=>b-a)
+console.log(movements)
+
+
+//movements.sort((a , b)=> {
+ // if(a>b)
+ // return -1;
+ //if(b>a)
+ //return 1;
+ //})
+//console.log(movements)
+
+// ================== 164 ==================
+const arr2 = [1,2,3,4,5,6,7]
+
+const x = new Array(7);
+console.log(x)
+
+//x.fill(1)
+
+
+// empty arrays + fill method
+x.fill(1,3,5)
+console.log(x)
+
+arr2.fill(23,2,6)
+console.log(arr2)
+
+// Array.from
+
+const y = Array.from({length:7},()=>1)
+console.log(y)
+
+
+const z = Array.from({length:7},(_,i)=> i+1)
+console.log(z)
+
+const riceRolls = Array.from({length:100},(element)=>{
+  return element = Math.floor(Math.random()*6+1)
+});
+
+console.log(riceRolls)
+
+
+
+labelBalance.addEventListener('click',function(){
+  const movementsUI = Array.from(document.querySelectorAll('.movements__value'),el=>Number(el.textContent))
+
+})
+
