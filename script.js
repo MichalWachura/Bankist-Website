@@ -508,3 +508,12 @@ dotContainer.addEventListener('click', function (e) {
 }
 
 slider()
+
+document.addEventListener('DOMContentLoaded',function(e){
+  console.log("HTML parsed adn DOM tree build",e)
+})
+
+window.addEventListener('load',function(e){
+  console.log('Page fully loaded',e)
+})
+
