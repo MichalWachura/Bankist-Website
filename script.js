@@ -379,6 +379,7 @@ allSections.forEach(function(section){
 })
 
 // 200 Lazy loading Images
+const imgTargets = document.querySelectorAll('img[data-src]')
 
 const loadImg = function(entires,observer){
   const [entry] = entires;
@@ -388,11 +389,11 @@ const loadImg = function(entires,observer){
   // Replace src with data-src
   entry.target.src = entry.target.dataset.src;
   entry.target.addEventListener('load',function(){
-    entry.classList.remove('lazy-img')
-  })
+    entry.target.classList.remove('lazy-img')
+})
   observer.unobserve(entry.target)
 }
-const imgTargets = document.querySelectorAll('img[data-src]')
+
 const imgObserver = new IntersectionObserver(loadImg,{
 
   root : null,
